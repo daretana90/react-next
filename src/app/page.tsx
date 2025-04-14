@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Footer from "./footer";
+import Usercrud from "./usercrud";
 
-export default function Home() {
+export default function Page() {
   return (
     <>
       <div className="border p-10 m-5">
@@ -9,9 +10,7 @@ export default function Home() {
         <Link href={`/blog/`} className="underline">
           Go to blog
         </Link>
-
-        <h1>CRUD´s from SQL SERVER</h1>
-
+        <Usercrud/>
         <Footer />
       </div>
     </>
