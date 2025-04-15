@@ -18,7 +18,15 @@ npm install axios
 npm install react-toastify
 ```
 
+## How to add Tailwind
+
+npm install tailwindcss @tailwindcss/postcss postcss
+
+
+
+
 # Documentacion
+
 https://nextjs.org/learn/dashboard-app
 
 https://www.reactjs.wiki/
