@@ -20,9 +20,14 @@ const Usercrud = () => {
       status: "",
     },
   ]);
+  const [loading, setLoading] = React.useState(false);
   const [editing, setEditing] = React.useState(false);
   const [userId, setUserId] = React.useState(null);
-  const API_URL = "http://localhost:5000/api/users";
+
+  // EXPRESS SQL SERVER
+  // const API_URL = "http://localhost:5000/api/users";
+  // LARAVEL Lumen LumenMySQL
+  const API_URL = "http://lumen/LEARN/lumen/blog/public/api";
 
   React.useEffect(() => {
     fetchUsers();
@@ -30,15 +35,69 @@ const Usercrud = () => {
 
   const fetchUsers = async () => {
     setUsers([]);
+    setLoading(true);
     try {
-      const response = await axios.get(API_URL);
+      const response = await axios.get(`${API_URL}/users`);
       console.log(response);
-      setUsers(response.data.empData);
+      // setUsers(response.data.empData);
+      setUsers(response.data);
       toast.success("Obtener usuarios");
+      setLoading(false);
     } catch (error) {
       console.log(error);
     }
   };
+
+  const createUser = async () => {
+    console.log("CREATE FUNCION");
+    try {
+      setLoading(true);
+      const response = await axios.post(`${API_URL}/users`, {
+        name: "REACT USER CREATED",
+        email: "mail@mail.com",
+      });
+      console.log(response);
+      if (response.data.insertado >= 1) {
+        toast.info("Usuario creado");
+        fetchUsers();
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  async function updateUser(id: number, mail: string) {
+    console.log("UPDATE FUNCION", id);
+    toast.info("Usuario actualizado");
+    try {
+      const response = await axios.put(`${API_URL}/user/${id}`, {
+        name: "UPDATED",
+        email: `update-${mail}`,
+      });
+      console.log(response);
+      if (response.data === 1) {
+        fetchUsers();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function deleteUser(id: number) {
+    console.log("DELETE FUNCION", id);
+    try {
+      toast.warning("Usuario eliminado");
+      const response = await axios.delete(`${API_URL}/user/${id}`);
+      console.log(response);
+      if (response.data === 1) {
+        fetchUsers();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const editUser = async (userId: number) => {
     try {
@@ -49,37 +108,16 @@ const Usercrud = () => {
     }
   };
 
-  async function updateUser(userId: number, userMail: string) {
-    console.log("UPDATE FUNCION", userId);
-    toast.info("Usuario actualizado");
-    try {
-      const response = await axios.put(`${API_URL}/user/${userId}`, {
-        name: "UPDATE FROM REACT",
-        email: `${userMail}REACT`,
-      });
-      console.log(response);
-      if (response.data === 1) {
-        alert("Registro eliminado correctamente");
-        fetchUsers();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async function deleteUser(userId: number) {
-    console.log("DELETE FUNCION", userId);
-    try {
-      toast.warning("Usuario eliminado");
-      const response = await axios.delete(`${API_URL}/${userId}`);
-      console.log(response);
-      if (response.data === 1) {
-        alert("Registro eliminado correctamente");
-        fetchUsers();
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  function loadingHTML(loading: boolean) {
+    if (!loading) return null;
+    return (
+      <div role="status" className="max-w-sm animate-pulse">
+        <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>
+        <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px] mb-2.5"></div>
+        <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px]"></div>
+        <span className="sr-only">Loading...</span>
+      </div>
+    );
   }
 
   return (
@@ -90,6 +128,12 @@ const Usercrud = () => {
         </span>
         <br />
         <div className="py-5">
+          <button
+            onClick={createUser}
+            className="m-1 text-purple-500 hover:text-white hover:bg-purple-500 border border-purple-500 text-xs font-semibold rounded-full px-4 py-1 leading-normal"
+          >
+            AGREGAR ➕
+          </button>
           <button
             onClick={fetchUsers}
             className="text-purple-500 hover:text-white hover:bg-purple-500 border border-purple-500 text-xs font-semibold rounded-full px-4 py-1 leading-normal"
@@ -114,12 +158,19 @@ const Usercrud = () => {
               </td>
             </tr>
           </thead>
+          {loadingHTML(loading)}
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
+                <td>
+                  <span className="p-1">{user.id}</span>
+                </td>
+                <td>
+                  <span className="p-1">{user.name}</span>
+                </td>
+                <td>
+                  <span className="p-1">{user.email}</span>
+                </td>
                 <td>
                   <button
                     onClick={() => {
@@ -128,8 +179,7 @@ const Usercrud = () => {
                     className="m-2 text-blue-500 hover:text-white hover:bg-blue-500 border border-blue-500 text-xs font-semibold rounded-full px-4 py-1 leading-normal"
                     title="ACTUALIZAR REGISTRO"
                   >
-                    {" "}
-                    ACTUALIZAR💫
+                    ACTUALIZAR 💫
                   </button>
                   <button
                     onClick={() => {
@@ -145,15 +195,11 @@ const Usercrud = () => {
             ))}
           </tbody>
         </table>
-        <ToastContainer />
-
-        {/* <div role="status" className="max-w-sm animate-pulse">
-          <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>
-          <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px] mb-2.5"></div>
-          <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px]"></div>
-          <span className="sr-only">Loading...</span>
-        </div> */}
       </div>
+
+      <ToastContainer autoClose={1000} />
+
+      <div></div>
     </>
   );
 };
